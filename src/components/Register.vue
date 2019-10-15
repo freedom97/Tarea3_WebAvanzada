@@ -72,19 +72,7 @@
                   label="Nombre de la dependencia"
                   required
                 ></v-text-field>
-                <v-text-field
-                  v-model="nameCoordinator"
-                  :rules="nameRulesCoordinator"
-                  label="Nombre del coordinador(a)"
-                  required
-                ></v-text-field>
-                <v-text-field
-                  v-model="numberUsers"
-                  :rules="numberUsersRules"
-                  label="Máximo número de usuarios"
-                  required
-                ></v-text-field>
-                <v-text-field v-model="location" :rules="locationRules" label="Ubicación" required></v-text-field>
+        
               </v-col>
             </v-row>
 
@@ -93,11 +81,10 @@
                 <v-btn
                   :disabled="disabledButtonRegister"
                   color="primary"
-                  @click="signup"
+                  @click="signup()"
                   style="margin:5px;background:#08799C"
                 >Registrarse</v-btn>
               </v-col>
-              
             </v-row>
           </div>
 
@@ -110,20 +97,18 @@
 
 <script>
 import axios from "axios";
+const fb = require("../firebaseConfig.js");
 export default {
   name: "Register",
   data: function() {
     return {
-      title: "Registro",
+      title: "Register",
       names: "",
       lastnames: "",
       email: "",
       password: "",
       conPassword: "",
       nameDependence: "",
-      nameCoordinator: "",
-      numberUsers: "",
-      location: "",
       isActiveDependence: false,
 
       show1: false,
@@ -159,47 +144,40 @@ export default {
           nameDependence.length > 1 ||
           "El nombre de la dependencia debe ser más largo a 1 caracter"
       ],
-      nameRulesCoordinator: [
-        nameCoordinator =>
-          !!nameCoordinator || "El nombre del coordinador(a) es requerida",
-        nameCoordinator =>
-          nameCoordinator.length > 1 ||
-          "El nombre del coordinador(a) debe ser más largo a 1 caracter"
-      ],
-      numberUsersRules: [
-        numberUsers =>
-          !!numberUsers || "La cantidad máxima de usuarios es requerida",
-        numberUsers =>
-          numberUsers.length > 1 ||
-          "La cantidad máxima de usuarios debe ser más largo a 1 caracter"
-      ],
-      locationRules: [
-        location => !!location || "La ubicación es requerida",
-        location =>
-          location.length > 1 || "La ubicación debe ser más largo a 1 caracter"
-      ]
+    
     };
   },
   methods: {
     signup() {
+      const userInfoRegister = {
+        name: this.names,
+        lastName: this.lastnames,
+        email1: this.email,
+        pass: this.password,
+        dependence: this.nameDependence,
+        /* coordinator: this.nameCoordinator,
+        maxUsers: this.numberUsers,
+        location1: this.location, */
+        activie: this.isActiveDependence
+      };
       fb.auth
         .createUserWithEmailAndPassword(
           this.email,
+
           this.password
         )
-        .then(user => {
-          this.$store.commit("setCurrentUser", user);
+        .then(infoRegister => {
+          //this.$store.commit("setCurrentUser", user);
 
           // create user obj
           fb.usersCollection
-            .doc(user.uid)
+            .doc(infoRegister.user.uid)
             .set({
-              name: this.names,
-              lastName: this.lastnames
+              userInfoRegister
             })
-            .then(() => {
-              this.$store.dispatch("fetchUserProfile");
-              this.$router.push("/dashboard");
+            .then(infoRegister => {
+              //this.$store.dispatch("fetchUserProfile");
+              this.$router.push("/login");
             })
             .catch(err => {
               console.log(err);
@@ -217,6 +195,8 @@ export default {
         !this.lastname &&
         !this.email &&
         !this.password &&
+        !this.nameDependence &&
+        !this.isActiveDependence &&
         this.conPassword === this.password
       );
     }

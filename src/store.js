@@ -6,8 +6,16 @@ Vue.use(Vuex)
 
 export const store = new Vuex.Store({
     state: {
-        currentUser: null,
-        userProfile: {}
+        currentUser: {
+            names: "",
+            lastnames: "",
+            email: "",
+            password: "",
+            dependences: [],
+            active: "false"
+        },
+        userProfile: {},
+        
     },
     actions: {
         fetchUserProfile({ commit, state }) {

@@ -32,7 +32,7 @@
          <!--  <router-link class="linkStyle" to="/recover">Olvidé mi contraseña</router-link>
           <br /> -->
           <br />
-          <v-btn color="primary" style="margin:10px;background:#08799C" @click="login">Ingresar</v-btn>
+          <v-btn color="primary" style="margin:10px;background:#08799C" @click="login()">Ingresar</v-btn>
         </v-form>
       </v-container>
     </v-card>
@@ -65,7 +65,7 @@ export default {
   },
   methods:{
     login() {
-    fb.auth.signInWithEmailAndPassword(this.loginForm.email, this.loginForm.password).then(user => {
+    fb.auth.signInWithEmailAndPassword(this.email, this.password).then(user => {
         this.$store.commit('setCurrentUser', user.user) 
         this.$store.dispatch('fetchUserProfile')
         this.$router.push('/profileUser')
