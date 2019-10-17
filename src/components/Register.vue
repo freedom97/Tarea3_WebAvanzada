@@ -72,7 +72,6 @@
                   label="Nombre de la dependencia"
                   required
                 ></v-text-field>
-        
               </v-col>
             </v-row>
 
@@ -97,9 +96,12 @@
 
 <script>
 import axios from "axios";
+// import ProfileUser from "./ProfileUser";
+import { db } from "../firebaseConfig";
 const fb = require("../firebaseConfig.js");
 export default {
   name: "Register",
+ 
   data: function() {
     return {
       title: "Register",
@@ -143,10 +145,10 @@ export default {
         nameDependence =>
           nameDependence.length > 1 ||
           "El nombre de la dependencia debe ser más largo a 1 caracter"
-      ],
-    
+      ]
     };
   },
+ 
   methods: {
     signup() {
       const userInfoRegister = {
@@ -155,11 +157,9 @@ export default {
         email1: this.email,
         pass: this.password,
         dependence: this.nameDependence,
-        /* coordinator: this.nameCoordinator,
-        maxUsers: this.numberUsers,
-        location1: this.location, */
         activie: this.isActiveDependence
       };
+      console.log(this.names);
       fb.auth
         .createUserWithEmailAndPassword(
           this.email,
@@ -167,27 +167,25 @@ export default {
           this.password
         )
         .then(infoRegister => {
-          //this.$store.commit("setCurrentUser", user);
+         // this.$store.commit("setCurrentUser", user);
+         fb.usersCollection.add({
+           userInfoRegister
+         });
 
-          // create user obj
-          fb.usersCollection
-            .doc(infoRegister.user.uid)
-            .set({
-              userInfoRegister
-            })
+        /*   // create user obj
+          
             .then(infoRegister => {
               //this.$store.dispatch("fetchUserProfile");
+ */
               this.$router.push("/login");
-            })
-            .catch(err => {
-              console.log(err);
-            });
+          
         })
         .catch(err => {
           console.log(err);
         });
     }
   },
+
   computed: {
     disabledButtonRegister() {
       return (

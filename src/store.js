@@ -11,7 +11,7 @@ export const store = new Vuex.Store({
             lastnames: "",
             email: "",
             password: "",
-            dependences: [],
+            dependences: "",
             active: "false"
         },
         userProfile: {},
