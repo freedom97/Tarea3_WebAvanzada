@@ -17,14 +17,17 @@
         :shrink-on-scroll="shrinkOnScroll"
         :extended="extended"
       >
-        <v-app-bar-nav-icon></v-app-bar-nav-icon>
-
         <v-spacer></v-spacer>
 
         <v-toolbar-title class="title" style="align-self:center">AUTHAPP</v-toolbar-title>
 
         <v-spacer></v-spacer>
 
+         <v-btn icon @click="logout()">
+           <v-icon>
+            mdi-logout
+           </v-icon>
+         </v-btn>
 
       </v-app-bar>
   </div>
@@ -44,6 +47,12 @@
       color: 'dark',
       colors: ['primary', 'accent', 'warning lighten-2', 'teal', 'orange'],
     }),
+    methods:{
+      logout(){
+        localStorage.clear()
+        this.$router.push('/login')
+      }
+    }
   }
 </script>
 <style scoped>

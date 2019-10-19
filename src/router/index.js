@@ -29,7 +29,7 @@ const router = new Router({
         },
         {path:'/adminProfile', redirect:'/adminProfile/users', name:'admin',component:Admin, children:[
             {path:'users',name:'users', component:Users},
-            {path:'deps',name:'deps', component:Dep}
+            {path:'deps',name:'deps',component:Dep}
         ]}
 
 

@@ -15,13 +15,13 @@
           Editar usuario
         </v-card-title>
         <div style="margin:auto;width:70%; display:flex;flex-direction:column;align-items:center">
-        <v-text-field :v-model="userToEdit.name" label='Nombre(s)' :value="currentUser.nombre"></v-text-field>
-        <v-text-field :v-model="userToEdit.lastname" label='Apellido(s)' :value="currentUser.apellido"></v-text-field>
-        <v-text-field :v-model="userToEdit.email" label='Email' :value="currentUser.email"></v-text-field>
-        <v-select v-model="userToEdit.deps" placeholder="Dependencias" :multiple="true"  :items="['Logística','Desarrollo']" ></v-select>
+        <v-text-field v-model="currentUser.nombre" label='Nombre(s)'></v-text-field>
+        <v-text-field v-model="currentUser.apellido" label='Apellido(s)' :value="currentUser.apellido"></v-text-field>
+        <v-text-field v-model="currentUser.email" label='Email' :value="currentUser.email"></v-text-field>
+        <v-select v-model="currentUser.deps" placeholder="Dependencias" multiple solo attach :items="['Logística','Desarrollo']" ></v-select>
         <v-menu
         ref="menu2"
-        v-model="menu"
+        v-model="menu2"
         :close-on-content-click="false"
         :return-value.sync="date"
         transition="scale-transition"
@@ -30,17 +30,17 @@
       >
         <template v-slot:activator="{ on }">
           <v-text-field
-            :v-model="userToEdit.date"
+            v-model="currentUser.valido"
             label="Valido hasta"
             prepend-icon="event"
             readonly
             v-on="on"
           ></v-text-field>
         </template>
-        <v-date-picker v-model="userToEdit.date" no-title scrollable>
+        <v-date-picker v-model="currentUser.valido" no-title scrollable>
           <v-spacer></v-spacer>
-          <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
-          <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
+          <v-btn text color="primary" @click="menu2 = false">Cancel</v-btn>
+          <v-btn text color="primary" @click="$refs.menu2.save(date)">OK</v-btn>
         </v-date-picker>
       </v-menu>
 
@@ -54,14 +54,14 @@
           <v-btn
             color="primary"
             text
-            @click="dialog = false"
+            @click="updateUser()"
           >
             Actualizar
           </v-btn>
           <v-btn
             color="error"
             text
-            @click="dialogEdit = false"
+            @click="updatePage()"
           >
             Cancelar
           </v-btn>
@@ -128,7 +128,7 @@
           <v-btn
             color="error"
             text
-            @click="dialogAdd = false"
+            @click="dialogAdd=false"
           >
             Cancelar
           </v-btn>
@@ -140,7 +140,7 @@
     <div class="table">
       <div style="width:50%">
         <v-text-field
-          placeholder="Buscar usuarios nombre, apellido o correo"
+          placeholder="Buscar usuarios nombre, apellido, correo o dependencia"
           v-model="search"
           append-icon="search"
         ></v-text-field>
@@ -154,6 +154,9 @@
         :items-per-page="15"
         class="elevation-1"
       >
+      <template v-slot:item.deps="{item}">
+        <p v-for="dep in item.deps" v-text="dep" :key="dep"></p>
+      </template>
         <template v-slot:item.acciones="{ item }">
           <v-btn class="mr-1" small color="primary" rounded @click="editUser(item)">
             <v-icon>mdi-pencil</v-icon>
@@ -202,17 +205,7 @@ export default {
       valid:"",
       date: new Date().toISOString().substr(0, 10),
       menu: false,
-
-      userToEdit:
-        {
-          name:"",
-          lastname:"",
-          email:"",
-          deps:[],
-          valid:"",
-          date:new Date().toISOString().substr(0, 10),
-          menu2:false
-        },
+      menu2:false,
 
       search: "",
       currentUser:"",
@@ -233,38 +226,12 @@ export default {
         { text: "Apellido", value: "apellido", align:'center' },
         { text: "Email", value: "email", align:'center' },
         { text: "Estado", value: "estado", sortable: false , align:'center'},
-        { text: "Acciones", value: "acciones", sortable: false , align:'center'}
+        { text: "Dependencias", value: "deps", sortable: false , align:'center'},
+        { text: "Acciones", value: "acciones", sortable: false , align:'center'},
+        { text: "Valido hasta", value: "valido", sortable: false , align:'center'}
+
       ],
-      users: [
-        {
-          id: "0",
-          nombre: "Julian",
-          apellido: "Gutierrez",
-          estado:"Activo",
-          email: "juligury@gmail.com",
-          valido:'10/11/2019',
-          deps:[
-            "Logistica",
-            "Desarrollo"
-          ]
-        },
-        {
-          id: "1",
-          nombre: "Camilo",
-          apellido: "Tobar",
-          estado:"Activo",
-          email: "camilotobar@outlook.com",
-          valido:'17/12/2019',
-           deps:[
-            "Logistica",
-            "Desarrollo"
-          ]
-        }
-      ],
-      deps:[
-        'Desarrollo',
-        'Logísitica'
-      ]
+      users: [ ],
     };
   },
   created(){
@@ -286,16 +253,22 @@ export default {
           id:data.id,
           nombre:data.nombre,
           apellido:data.apellido,
+          valido:data.valido,
           estado:date>data.valido?'Inactivo':'Activo',
           email: data.email,
           deps:data.deps
         }
         this.users.push(user)
-        console.log(user.deps)
       }
     })})
   },
+  props:[
+    'dep'
+  ],
   methods:{
+    updatePage(){
+      this.$router.go(this.$router.currentRoute)
+    },
 
     addUser(){
       let user={
@@ -307,16 +280,28 @@ export default {
         deps:this.deps
       }
       fb.usersCollection.doc(user.id).set(user)
-      this.dialogAdd=false
-
+      this.updatePage()
     },
-    removeUser(item){ 
-      fb.usersCollection.doc(item.id).delete()
+    async removeUser(item){ 
+      await fb.usersCollection.doc(item.id).delete()
+      location.reload()
   },
     editUser(item){
       this.dialogEdit=true
       this.currentUser=item
     },
+    updateUser(){
+        let user={
+        id:this.currentUser.id,
+        nombre: this.currentUser.nombre,
+        apellido:this.currentUser.apellido,
+        email:this.currentUser.email,
+        valido:this.currentUser.valido,
+        deps:this.currentUser.deps
+      }
+      fb.usersCollection.doc(user.id).set(user)
+      this.$router.go(this.$router.currentRoute)
+    }
   }
 };
 </script>
