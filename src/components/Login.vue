@@ -6,7 +6,7 @@
           <template v-slot:activator="{ on }">
           </template>
           <v-card>
-            <v-card-title class="headline">Imposible iniciar sesión</v-card-title>
+            <v-card-title class="headline">Imposible iniciar sesión. Revisar correo o contraseña</v-card-title>
             <v-card-text>{{msg}}</v-card-text>
             <v-card-actions>
               <div class="flex-grow-1"></div>
