@@ -1,63 +1,172 @@
 <template>
-  <div class="main">
-    <v-container>
-      <h1>Información personal</h1>
-      <br />
-      <v-card elevation="7" class="containerClass" >
-        <v-simple-table>
-          <template v-slot:default>
-            <thead id="table-user">
-              <tr>
-                <th class="text-left">Nombres</th>
-                <th class="text-left">Apellidos</th>
-              </tr>
-            </thead>
-            <tbody id="table-user">
-              <tr>
-                <td></td>
-                <td></td>
-              </tr>
-            </tbody>
-          </template>
-        </v-simple-table>
-      </v-card>
-      <v-btn color="primary" style="margin:10px;background:#08799C" @click="getInfoUser()">Editar perfil</v-btn>
-      <br />
-       <h1>Información de Dependencia</h1>
-      <br />
+  <div class="usersContent">
+ <div class="text-center">
+    <v-dialog
+      v-model="dialogEdit"
+      width="500"
+      persistent
+  
+    >
+      <v-card>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          Editar usuario
+        </v-card-title>
+        <div style="margin:auto;width:70%; display:flex;flex-direction:column;align-items:center">
+        <v-text-field :v-model="userToEdit.name" label='Nombre(s)' :value="currentUser.nombre"></v-text-field>
+        <v-text-field :v-model="userToEdit.lastname" label='Apellido(s)' :value="currentUser.apellido"></v-text-field>
+        <v-text-field :v-model="userToEdit.email" label='Email' :value="currentUser.email"></v-text-field>
+        <v-select v-model="userToEdit.deps" placeholder="Dependencias" :multiple="true"  :items="['Logística','Desarrollo']" ></v-select>
+        <v-menu
+        ref="menu2"
+        v-model="menu"
+        :close-on-content-click="false"
+        :return-value.sync="date"
+        transition="scale-transition"
+        offset-y
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on }">
+          <v-text-field
+            :v-model="userToEdit.date"
+            label="Valido hasta"
+            prepend-icon="event"
+            readonly
+            v-on="on"
+          ></v-text-field>
+        </template>
+        <v-date-picker v-model="userToEdit.date" no-title scrollable>
+          <v-spacer></v-spacer>
+          <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
+          <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
+        </v-date-picker>
+      </v-menu>
 
-      <v-card elevation="5" class="containerClass" >
-        <v-simple-table>
-          <template v-slot:default>
-            <thead id="table-dependence">
-              <tr>
-                <th class="text-left">Nombre dependencia</th>
-                <th class="text-left">Coordinador</th>
-                <th class="text-left">Número máximo de usuarios</th>
-                <th class="text-left">Ubicación</th>
-              </tr>
-            </thead>
-            <tbody id="table-user">
-              <tr :key="i" v-for="(currentUser,i) in listUsers">
-                <td>{{currentUser.names}}</td>
-                <td></td>
-              </tr>
-            </tbody>
-          </template>
-        </v-simple-table>
+        </div>
+
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="primary"
+            text
+            @click="dialog = false"
+          >
+            Actualizar
+          </v-btn>
+          <v-btn
+            color="error"
+            text
+            @click="dialogEdit = false"
+          >
+            Cancelar
+          </v-btn>
+        </v-card-actions>
       </v-card>
-      <!--  <router-link class="linkStyle" to="/recover">Olvidé mi contraseña</router-link>
-      <br />-->
-      <br />
-      <v-btn color="primary" style="margin:10px;background:#08799C" @click="login()">Editar dependencia</v-btn>
-    </v-container>
+    </v-dialog>
+     <v-dialog
+      v-model="dialogAdd"
+      width="500"
+      persistent
+  
+    >
+      <v-card>
+        <v-card-title
+          class="headline grey lighten-2"
+          primary-title
+        >
+          Agregar usuario
+        </v-card-title>
+        <v-form  ref="form" v-model="valid" style="margin:auto;width:70%; display:flex;flex-direction:column;align-items:center">
+        <v-text-field :rules="rules" v-model="name" label='Nombre(s)'></v-text-field>
+        <v-text-field :rules="rules" v-model="lastname" label='Apellido(s)'></v-text-field>
+        <v-text-field :rules="emailRules" v-model="email" label='Email'></v-text-field>
+        <v-select :rules="selectRules" v-model="deps" placeholder="Dependencias" :multiple="true" :items="['Logística','Desarrollo']"></v-select>
+
+         <v-menu
+        ref="menu"
+        v-model="menu"
+        :close-on-content-click="false"
+        :return-value.sync="date"
+        transition="scale-transition"
+        offset-y
+        min-width="290px"
+      >
+        <template v-slot:activator="{ on }">
+          <v-text-field
+            v-model="date"
+            label="Valido hasta"
+            prepend-icon="event"
+            readonly
+            v-on="on"
+          ></v-text-field>
+        </template>
+        <v-date-picker v-model="date" no-title scrollable>
+          <v-spacer></v-spacer>
+          <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
+          <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
+        </v-date-picker>
+      </v-menu>
+
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            :disabled="!valid"
+            color="primary"
+            text
+            @click="addUser()"
+          >
+            Agregar
+          </v-btn>
+          <v-btn
+            color="error"
+            text
+            @click="dialogAdd = false"
+          >
+            Cancelar
+          </v-btn>
+        </v-card-actions>
+        </v-form>
+      </v-card>
+    </v-dialog>
+  </div>
+    <div class="table">
+      <div style="width:50%">
+        <v-text-field
+          placeholder="Buscar usuarios nombre, apellido o correo"
+          v-model="search"
+          append-icon="search"
+        ></v-text-field>
+      </div>
+      <v-data-table
+        :search="search"
+        :loading="users.length===0"
+        style="width:100%;"
+        :headers="headers"
+        :items="users"
+        :items-per-page="15"
+        class="elevation-1"
+      >
+        
+      </v-data-table>
+      <v-btn @click="dialogAdd=true" style="margin-top:-45px" color="primary" dark small fab>
+        <v-icon>mdi-plus</v-icon>
+      </v-btn>
+    </div>
   </div>
 </template>
 
 <script>
 import { db, currentUser } from "../firebaseConfig";
 import Register from "./Register";
-import {mapState,mapMutations} from "vuex"
+import { mapState, mapMutations } from "vuex";
 const fb = require("../firebaseConfig.js");
 export default {
   name: "ProfileUser",
@@ -65,33 +174,44 @@ export default {
   data: function() {
     return {
       title: "ProfileUser",
-      listUsers: [],
-      item:{
-        name:'',
-      }
+      userToEdit:
+        {
+          name:"",
+          lastname:"",
+          email:"",
+          deps:[],
+          valid:"",
+          date:new Date().toISOString().substr(0, 10),
+          menu2:false
+        },
+        currentUser:"",
+
+      dialogEdit:false,
+      headers: [
+        { text: "Id", value: "id", align:'center'},
+        {
+          text: "Nombre",
+          align: "center",
+          sortable: true,
+          value: "nombre"
+        },
+        { text: "Apellido", value: "apellido", align:'center' },
+        { text: "Email", value: "email", align:'center' },
+        { text: "Estado", value: "estado", sortable: false , align:'center'},
+        { text: "Acciones", value: "acciones", sortable: false , align:'center'}
+      ],
     };
   },
-  computed:{
-    ...mapState(['currentUser'])
-
+  computed: {
+    ...mapState(["currentUser"])
   },
   methods: {
-  
-    getInfoUser() {
-     
-      var tableUser = document.getElementById("table-user");
-   
-      fb.usersCollection
-        .onSnapshot(querySnapshot => {
-          tableUser.innerHTML = "";
-          querySnapshot.forEach(doc => {
-            console.log(`${doc.id}=> ${doc.data()}`);
-            tableUser.innerHTML = ` <tr >
-                <td> ${doc.data()}</td>
-                <td></td>
-              </tr> `;
-          });
-        });
+    removeUser(item) {
+      fb.usersCollection.doc(item.id).delete();
+    },
+    getInfoUser(item) {
+      this.dialogEdit = true;
+      this.currentUser = item;
     }
   }
 };

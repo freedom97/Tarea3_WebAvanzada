@@ -7,14 +7,21 @@ Vue.use(Vuex)
 export const store = new Vuex.Store({
     state: {
         currentUser: {
-            names: "",
-            lastnames: "",
+            nombre: "",
+            apellido: "",
             email: "",
             password: "",
-            dependences: "",
-            active: "false"
+            id:0,
+            deps: "",
+            valido: "",
+            activo:"false",
         },
         userProfile: {},
+        currentDep:{
+            dep:"",
+            id:0,
+
+        },
         
     },
     actions: {
@@ -24,7 +31,8 @@ export const store = new Vuex.Store({
             }).catch(err => {
                 console.log(err)
             })
-        }
+        },
+        
 
     },
     mutations: {

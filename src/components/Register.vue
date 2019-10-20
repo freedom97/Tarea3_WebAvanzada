@@ -65,13 +65,17 @@
               </v-col>
             </v-row>
             <v-row justify="center">
-              <v-col cols="1" md="5" sm="2">
-                <v-text-field
-                  v-model="nameDependence"
-                  :rules="nameRulesDependences"
-                  label="Nombre de la dependencia"
-                  required
-                ></v-text-field>
+              <v-col cols="1" md="6" sm="2">
+                <v-select
+                  v-model="modelDeps"
+                  :items="deps"
+                  item-text="dependencias"
+                  :menu-props="{ maxHeight: '400' }"
+                  label="Seleccionar "
+                  multiple
+                  hint="Selecciona tu(s) dependencia(s)"
+                  persistent-hint
+                ></v-select>
               </v-col>
             </v-row>
 
@@ -101,7 +105,7 @@ import { db } from "../firebaseConfig";
 const fb = require("../firebaseConfig.js");
 export default {
   name: "Register",
- 
+
   data: function() {
     return {
       title: "Register",
@@ -110,8 +114,11 @@ export default {
       email: "",
       password: "",
       conPassword: "",
-      nameDependence: "",
-      isActiveDependence: false,
+      deps:['dependencia10'],
+      isActiveDependence: true,
+      valid: "",
+      date: new Date().toISOString().substr(0, 10),
+      id: Math.random(),
 
       show1: false,
       show2: true,
@@ -136,28 +143,23 @@ export default {
       emailRules: [
         email => !!email || "El correo es requerido",
         email =>
-          /^[a-zA-Z0-9_.+-]+@(gmail|hotmail)\.com$/.test(email) ||
+             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email) ||
           "El correo no es valido"
       ],
-      nameRulesDependences: [
-        nameDependence =>
-          !!nameDependence || "El nombre de la dependencia es requerida",
-        nameDependence =>
-          nameDependence.length > 1 ||
-          "El nombre de la dependencia debe ser más largo a 1 caracter"
-      ]
     };
   },
- 
+
   methods: {
     signup() {
       const userInfoRegister = {
-        name: this.names,
-        lastName: this.lastnames,
-        email1: this.email,
+        nombre: this.names,
+        apellido: this.lastnames,
+        email: this.email,
         pass: this.password,
-        dependence: this.nameDependence,
-        activie: this.isActiveDependence
+        id: this.id,
+        deps: this.deps,
+        valido: this.date,
+        activo: this.isActiveDependence
       };
       console.log(this.names);
       fb.auth
@@ -167,18 +169,17 @@ export default {
           this.password
         )
         .then(infoRegister => {
-         // this.$store.commit("setCurrentUser", user);
-         fb.usersCollection.add({
-           userInfoRegister
-         });
+          // this.$store.commit("setCurrentUser", user);
+          fb.usersCollection.add({
+            userInfoRegister
+          });
 
-        /*   // create user obj
+          /*   // create user obj
           
             .then(infoRegister => {
               //this.$store.dispatch("fetchUserProfile");
  */
-              this.$router.push("/login");
-          
+          this.$router.push("/login");
         })
         .catch(err => {
           console.log(err);
@@ -193,8 +194,7 @@ export default {
         !this.lastname &&
         !this.email &&
         !this.password &&
-        !this.nameDependence &&
-        !this.isActiveDependence &&
+        !this.deps &&
         this.conPassword === this.password
       );
     }
@@ -211,7 +211,7 @@ export default {
   width: 100vw;
   height: 100%;
   display: flex;
-  padding-top:100px;
+  padding-top: 100px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
