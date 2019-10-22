@@ -29,8 +29,6 @@
             v-model.trim="password"
             :rules="passwordRules"
           ></v-text-field>
-         <!--  <router-link class="linkStyle" to="/recover">Olvidé mi contraseña</router-link>
-          <br /> -->
           <br />
           <v-btn color="primary" style="margin:10px;background:#08799C" @click="login()">Ingresar</v-btn>
         </v-form>

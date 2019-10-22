@@ -114,11 +114,11 @@ export default {
       email: "",
       password: "",
       conPassword: "",
-      deps:['dependencia10'],
+      deps:['Desarrollo','Análisis','Diseño','Logística','Comunicación','Administrador'],
       isActiveDependence: true,
       valid: "",
       date: new Date().toISOString().substr(0, 10),
-      id: Math.random(),
+      id: Math.floor(Math.random()* (1000 - 3) + 3),
 
       show1: false,
       show2: true,
@@ -170,9 +170,9 @@ export default {
         )
         .then(infoRegister => {
           // this.$store.commit("setCurrentUser", user);
-          fb.usersCollection.add({
+          fb.usersCollection.add(
             userInfoRegister
-          });
+          );
 
           /*   // create user obj
           
