@@ -201,6 +201,7 @@ export default {
       name:"",
       lastname:"",
       email:"",
+      password:"password",
       deps:[],
       valid:"",
       date: new Date().toISOString().substr(0, 10),
@@ -308,13 +309,35 @@ export default {
       let user={
         id:this.users.length.toString(),
         nombre: this.name,
-        password:'password',
+        password:this.password,
         apellido:this.lastname,
         email:this.email,
         valido:this.date,
         deps:this.deps
       }
       await fb.usersCollection.doc(user.id).set(user)
+      fb.auth
+        .createUserWithEmailAndPassword(
+          this.email,
+
+          this.password
+        )
+        .then(infoRegister => {
+          // this.$store.commit("setCurrentUser", user);
+          fb.usersCollection.add(
+            user
+          );
+
+          /*   // create user obj
+          
+            .then(infoRegister => {
+              //this.$store.dispatch("fetchUserProfile");
+ */
+          this.$router.push("users");
+        })
+        .catch(err => {
+          console.log(err);
+        });
       this.updatePage()
     },
     async removeUser(item){ 
