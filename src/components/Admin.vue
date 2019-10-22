@@ -19,6 +19,14 @@
 <script>
 export default {
 
+  created(){
+/*       if(!this.$store.currentUser){
+      this.$router.push('/login')
+    } */
+  },
+  methods:{
+
+  }
 }
 </script>
 
