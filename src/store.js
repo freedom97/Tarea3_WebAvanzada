@@ -12,9 +12,8 @@ export const store = new Vuex.Store({
             email: "",
             password: "",
             id:0,
-            deps: "",
+            deps: [],
             valido: "",
-            activo:"false",
         },
         userProfile: {},
         currentDep:{

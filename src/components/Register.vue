@@ -115,7 +115,6 @@ export default {
       password: "",
       conPassword: "",
       deps:['Desarrollo','Análisis','Diseño','Logística','Comunicación','Administrador'],
-      isActiveDependence: true,
       valid: "",
       date: new Date().toISOString().substr(0, 10),
       id: Math.floor(Math.random()* (1000 - 3) + 3),
@@ -159,7 +158,6 @@ export default {
         id: this.id,
         deps: this.deps,
         valido: this.date,
-        activo: this.isActiveDependence
       };
       console.log(this.names);
       fb.auth

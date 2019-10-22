@@ -73,7 +73,6 @@
     <div class="table">
      
       <v-data-table
-        :search="search"
         :loading="users.length===0"
         style="width:100%;"
         :headers="headers"
@@ -173,24 +172,26 @@ export default {
     
    fb.usersCollection.get().then(querySnapshot=>{querySnapshot.forEach(doc=>{
       let data=(doc.data())
-     
-     
-        user={
-          id:data.id,
-          nombre:data.nombre,
-          apellido:data.apellido,
-          valido:data.valido,
-          estado:date>data.valido?'Inactivo':'Activo',
-          email: data.email,
-          deps:data.deps
-        }
-        fb.usersCollection.doc(user.email).get().then(doc=>{console.log(this.$store.email)})
+        if(data.email===this.$store.state.currentUser.email){
+          user={
+            id:data.id,
+            nombre:data.nombre,
+            apellido:data.apellido,
+            valido:data.valido,
+            estado:date>data.valido?'Inactivo':'Activo',
+            email: data.email,
+            deps:data.deps
+          }
+
+          this.$store.state.currentUser=user
+          this.users.push(user)
+          console.log(this.$store.state.currentUser)
+
+        }     
+
        })
    })
    
-     
-      
- 
   },
   props:[
     'dep'
