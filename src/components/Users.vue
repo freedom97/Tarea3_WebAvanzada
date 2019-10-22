@@ -18,7 +18,7 @@
         <v-text-field v-model="currentUser.nombre" label='Nombre(s)'></v-text-field>
         <v-text-field v-model="currentUser.apellido" label='Apellido(s)' :value="currentUser.apellido"></v-text-field>
         <v-text-field v-model="currentUser.email" label='Email' :value="currentUser.email"></v-text-field>
-        <v-select v-model="currentUser.deps" placeholder="Dependencias" multiple solo attach :items="['Logística','Desarrollo']" ></v-select>
+        <v-select v-model="currentUser.deps" placeholder="Dependencias" multiple solo attach :items="dep?dep.nombre:['Logística','Desarrollo']" ></v-select>
         <v-menu
         ref="menu2"
         v-model="menu2"
@@ -85,7 +85,7 @@
         <v-text-field :rules="rules" v-model="name" label='Nombre(s)'></v-text-field>
         <v-text-field :rules="rules" v-model="lastname" label='Apellido(s)'></v-text-field>
         <v-text-field :rules="emailRules" v-model="email" label='Email'></v-text-field>
-        <v-select :rules="selectRules" v-model="deps" placeholder="Dependencias" :multiple="true" :items="['Logística','Desarrollo']"></v-select>
+        <v-select :rules="selectRules" v-model="deps" placeholder="Dependencias" :multiple="true" :items="availableDeps"></v-select>
 
          <v-menu
         ref="menu"
@@ -234,7 +234,30 @@ export default {
       users: [ ],
     };
   },
+  props:[
+    'dep'
+  ],
+  watch:{
+    dep(){
+      this.users=[]
+      this.fetchUsers()
+    }
+  },
   created(){
+    this.users=[],
+    this.fetchUsers()
+  },
+  computed:{
+    availableDeps(){
+      let dependecies=this.dep?[this.dep]:['Logística','Desarrollo']
+      return dependecies
+    }
+  },
+  methods:{
+    updatePage(){
+      this.$router.go(this.$router.currentRoute)
+    },
+    fetchUsers(){ 
     let user ={
           id: "",
           nombre: "",
@@ -246,40 +269,52 @@ export default {
           ]
         }
     let date =new Date().toISOString().substring(0,10)
-    fb.usersCollection.get().then(querySnapshot=>{querySnapshot.forEach(doc=>{
-      let data=(doc.data())
-      if(doc.data().id){
-        user={
-          id:data.id,
-          nombre:data.nombre,
-          apellido:data.apellido,
-          valido:data.valido,
-          estado:date>data.valido?'Inactivo':'Activo',
-          email: data.email,
-          deps:data.deps
+    if(this.dep){
+      fb.usersCollection.get().then(querySnapshot=>{querySnapshot.forEach(doc=>{
+        let data=doc.data()
+        if(data.deps.includes(this.dep)){
+           user={
+            id:data.id,
+            nombre:data.nombre,
+            apellido:data.apellido,
+            valido:data.valido,
+            estado:date>data.valido?'Inactivo':'Activo',
+            email: data.email,
+            deps:data.deps
+          }
+          this.users.push(user)
         }
-        this.users.push(user)
-      }
-    })})
-  },
-  props:[
-    'dep'
-  ],
-  methods:{
-    updatePage(){
-      this.$router.go(this.$router.currentRoute)
+      })})
+    }
+    else{
+      fb.usersCollection.get().then(querySnapshot=>{querySnapshot.forEach(doc=>{
+        let data=(doc.data())
+        if(data.id){
+          user={
+            id:data.id,
+            nombre:data.nombre,
+            apellido:data.apellido,
+            valido:data.valido,
+            estado:date>data.valido?'Inactivo':'Activo',
+            email: data.email,
+            deps:data.deps
+          }
+          this.users.push(user)
+        }
+      })})
+    }
     },
-
-    addUser(){
+    async addUser(){
       let user={
         id:this.users.length.toString(),
         nombre: this.name,
+        password:'password',
         apellido:this.lastname,
         email:this.email,
         valido:this.date,
         deps:this.deps
       }
-      fb.usersCollection.doc(user.id).set(user)
+      await fb.usersCollection.doc(user.id).set(user)
       this.updatePage()
     },
     async removeUser(item){ 
@@ -290,7 +325,7 @@ export default {
       this.dialogEdit=true
       this.currentUser=item
     },
-    updateUser(){
+    async updateUser(){
         let user={
         id:this.currentUser.id,
         nombre: this.currentUser.nombre,
@@ -299,7 +334,7 @@ export default {
         valido:this.currentUser.valido,
         deps:this.currentUser.deps
       }
-      fb.usersCollection.doc(user.id).set(user)
+      await fb.usersCollection.doc(user.id).set(user)
       this.$router.go(this.$router.currentRoute)
     }
   }

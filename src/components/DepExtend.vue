@@ -1,14 +1,16 @@
 <template>
   <div class="depExtendContent">
-      <div v-for="user in dep.usuarios" :key="user.id" class="usuarios">
-          
-      </div>
+          <Users :dep="dep"/>
   </div>
 </template>
 
 <script>
+import Users from './Users'
 export default {
     name:'DepExtend',
+    components:{
+        Users
+    },
     props:[
         'dep'
     ]

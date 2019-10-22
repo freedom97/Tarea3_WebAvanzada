@@ -50,6 +50,7 @@
     methods:{
       logout(){
         localStorage.clear()
+        this.$store.currentUser=null
         this.$router.push('/login')
       }
     }
